@@ -1,0 +1,66 @@
+{% extends "base.html" %}{% block title %}Teacher Workspace | School Bus Tracking System{% endblock %}{% block content %}
+<div class="dashboard-topline">
+    <div>
+        <span class="eyebrow">TEACHER PORTAL</span>
+        <h1>Welcome, {{session.fullname.split(' ')[0]}}.</h1>
+        <p>View student transport records and recent attendance. Administrative controls remain restricted.</p>
+    </div>
+</div>
+<div class="panel">
+    <h2>Student transport records</h2>
+    {% if students %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Admission no.</th>
+                        <th>Student</th>
+                        <th>Route</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                        <tr>
+                            <td>{{student.admission_no}}</td>
+                            <td>{{student.fullname}}</td>
+                            <td>{{student.route}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>No student records have been added yet.</p>
+    {% endif %}
+</div>
+<div class="panel">
+    <h2>Recent attendance</h2>
+    {% if records %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Bus</th>
+                        <th>Status</th>
+                        <th>Recorded</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                        <tr>
+                            <td>{{record.student_name}}</td>
+                            <td>{{record.bus_number}}</td>
+                            <td>{{record.status}}</td>
+                            <td>{{record.recorded_at}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>No attendance has been recorded yet.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

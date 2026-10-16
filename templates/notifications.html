@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% block title %}Parent Notifications | School Bus Tracking System{% endblock %}{% block content %}
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">PARENT PORTAL</span>
+        <h1>Notifications</h1>
+        <p>Updates for your linked child or children.</p>
+    </div>
+</div>
+<div class="panel">
+    {% for n in notifications %}
+    <article class="notice {{'info' if n.is_read else 'success'}}">
+        <strong>{{n.created_at}}</strong>
+        <p>{{n.message}}</p>
+    </article>
+    {% else %}
+    <p>No notifications yet. A message will appear here when an arrival event is recorded for a linked student's route.</p>
+    {% endfor %}
+</div>
+{% endblock %}

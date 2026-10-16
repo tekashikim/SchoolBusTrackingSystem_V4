@@ -1,0 +1,107 @@
+{% extends "base.html" %}{% block title %}Bus Management | School Bus Tracking System{% endblock %}{% block content %}
+<div class="page-heading"><div>
+    <span class="eyebrow">FLEET ADMINISTRATION</span>
+    <h1>Bus Management</h1>
+    <p>Manage registrations, assign drivers and update the photo shown on the dashboard.</p>
+</div>
+</div>
+{% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}{% for category,message in messages %}
+<div class="notice {{ category }}">{{ message }}</div>
+{% endfor %}{% endif %}{% endwith %}
+<div class="panel panel-modern">
+    <h2>Add a bus</h2>
+    <form method="POST" action="{{url_for('add_bus')}}" class="formgrid">
+        <div>
+            <label for="bus_number">Bus registration</label>
+            <input id="bus_number" name="bus_number" placeholder="e.g. KDA 123A" required></div>
+            <div>
+                <label for="route">Route</label>
+                <input id="route" name="route" placeholder="e.g. Kikuyu – School" required>
+            </div>
+            <div>
+                <label for="driver_id">Assign driver</label>
+                <select id="driver_id" name="driver_id">
+                    <option value="">No driver</option>
+                    {% for d in drivers if d.account_status == 'Active' %}
+                    <option value="{{d.id}}">{{d.fullname}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="btn">Add bus</button>
+        </form>
+    </div>
+<div class="fleet-grid">
+    {% for b in buses %}
+    <article class="fleet-card">
+        <div class="fleet-photo-wrap">
+            {% if b.photo_filename %}
+            <img src="{{url_for('static',filename='uploads/' ~ b.photo_filename)}}" alt="Photo of {{b.bus_number}}">
+            {% else %}
+            <img src="{{url_for('static',filename='images/kenyan-school-bus.png')}}" alt="Default school bus image">
+            {% endif %}
+            <span class="fleet-photo-label">{{'CUSTOM BUS PHOTO' if b.photo_filename else 'DEFAULT IMAGE'}}</span>
+        </div>
+        <div class="fleet-card-body">
+            <div class="fleet-card-title">
+                <div>
+                    <span class="eyebrow">BUS REGISTRATION</span>
+                    <h2>{{b.bus_number}}</h2>
+                </div>
+                <span class="status-tag {{'status-green' if b.status=='On Route' else 'status-blue'}}">{{b.status}}</span>
+            </div>
+            <p>
+                <strong>Route:</strong> {{b.route}}</p>
+                <p>
+                    <strong>Driver:</strong> {{b.driver or 'Not assigned'}}</p>
+                    <form method="POST" action="{{ url_for('update_bus', bus_id=b.id) }}" class="bus-edit-form">
+                        <h3>Edit bus details</h3>
+                        <div>
+                            <label for="edit-number-{{b.id}}">Bus registration</label>
+                            <input id="edit-number-{{b.id}}" name="bus_number" value="{{b.bus_number}}" required></div>
+                            <div>
+                                <label for="edit-route-{{b.id}}">Route</label>
+                                <input id="edit-route-{{b.id}}" name="route" value="{{b.route}}" required></div>
+                                <div>
+                                    <label for="edit-driver-{{b.id}}">Assigned driver</label>
+                                    <select id="edit-driver-{{b.id}}" name="driver_id">
+                                        <option value="">No driver assigned</option>{% for d in drivers if d.account_status == 'Active' %}
+                                        <option value="{{d.id}}" {{ 'selected' if b.driver_id == d.id else '' }}>{{d.fullname}}</option>{% endfor %}</select>
+                                    </div>
+                                    <button class="btn btn-small" type="submit">Save bus changes</button>
+                                </form>
+                                <div class="bus-upload">
+                                    <form method="POST" action="{{url_for('upload_bus_photo',bus_id=b.id)}}" enctype="multipart/form-data">
+                                        <label for="bus-photo-{{b.id}}">{{'Replace bus photo' if b.photo_filename else 'Upload bus photo'}}</label>
+                                        <input id="bus-photo-{{b.id}}" type="file" name="photo" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required>
+                                        <small>Use a real photo of this bus (JPG, PNG or WEBP, max 5 MB).</small>
+                                        <button class="btn btn-small" type="submit">Save bus photo</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </article>{% else %}
+                        <div class="panel">No buses registered yet. Use the form above to add the first bus.</div>{% endfor %}
+                    </div>
+                    <div class="panel panel-modern">
+                        <h2>Driver photographs</h2>
+                        <p class="muted">Upload genuine, school-approved photos so parents and staff can identify assigned drivers.</p>
+                        <div class="driver-admin-grid">{% for d in drivers %}
+                            <div class="driver-admin-card">{% if d.photo_filename %}
+                                <img class="admin-driver-photo" src="{{url_for('static',filename='uploads/' ~ d.photo_filename)}}" alt="Photo of {{d.fullname}}">{% else %}
+                                <div class="admin-driver-photo driver-placeholder">{{d.fullname[:1]|upper}}
+
+                                </div>{% endif %}
+                                <div class="driver-admin-details">
+                                    <strong>{{d.fullname}}</strong>
+                                    <form method="POST" action="{{url_for('upload_driver_photo',driver_id=d.id)}}" enctype="multipart/form-data">
+                                        <label for="photo-{{d.id}}">{{'Replace driver photo' if d.photo_filename else 'Upload driver photo'}}</label>
+                                        <input id="photo-{{d.id}}" type="file" name="photo" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required>
+                                        <button class="btn btn-small">Save driver photo</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p>No driver accounts found.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endblock %}

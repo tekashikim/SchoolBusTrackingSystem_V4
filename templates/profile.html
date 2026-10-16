@@ -1,0 +1,23 @@
+{% extends "base.html" %}{% block title %}My Profile | School Bus Tracking System{% endblock %}{% block content %}
+<h1>My Profile</h1>
+<p class="muted">Update your personal details, profile photo, email address, or password.</p>
+{% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}{% for category,message in messages %}<div class="notice {{ category }}">{{ message }}</div>{% endfor %}{% endif %}{% endwith %}
+{% if error %}<div class="notice error">{{ error }}</div>{% endif %}
+<div class="panel profile-panel">
+  <div class="profile-heading">
+    {% if user.photo_filename %}<img class="profile-photo" src="{{ url_for('static', filename='uploads/' ~ user.photo_filename) }}" alt="Your profile photo">{% else %}<div class="profile-photo driver-placeholder">{{ user.fullname[:1]|upper }}</div>{% endif %}
+    <div><h2>{{ user.fullname }}</h2><p class="muted">{{ user.role }} account</p></div>
+  </div>
+  <form method="POST" enctype="multipart/form-data" class="profile-form">
+    <h2>Personal information</h2>
+    <label for="fullname">Full name</label><input id="fullname" name="fullname" value="{{ request.form.get('fullname', user.fullname) }}" required minlength="2" autocomplete="name">
+    <label for="email">Email address</label><input id="email" name="email" type="email" value="{{ request.form.get('email', user.email) }}" required autocomplete="email">
+    <label for="photo">Profile photo</label><input id="photo" name="photo" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"><p class="field-help">Optional. JPG, PNG, or WEBP, maximum 5 MB. Use your own genuine photo.</p>
+    <div class="form-divider"></div><h2>Change password</h2><p class="field-help">Leave the new password fields blank if you do not want to change your password.</p>
+    <label for="current_password">Current password (required only when changing password)</label><input id="current_password" name="current_password" type="password" autocomplete="current-password">
+    <label for="new_password">New password</label><input id="new_password" name="new_password" type="password" minlength="8" autocomplete="new-password">
+    <label for="confirm_password">Confirm new password</label><input id="confirm_password" name="confirm_password" type="password" minlength="8" autocomplete="new-password">
+    <button class="btn" type="submit">Save profile changes</button>
+  </form>
+</div>
+{% endblock %}

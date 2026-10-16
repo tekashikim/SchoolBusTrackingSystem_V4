@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Sign in | School Bus Tracking System{% endblock %}{% block content %}
+<div class="auth-page">
+    <a class="brand dark-brand auth-top-brand" href="/">
+        <span class="brand-mark">SB</span>
+        <span>School Bus<small>Tracking System · Kenya</small>
+        </span>
+    </a>
+        <div class="auth-layout">
+            <section class="auth-art">
+                <div class="auth-art-shade">
+
+                </div>
+                <div class="auth-art-copy"><span class="eyebrow">SCHOOL TRANSPORT, REIMAGINED</span><h1>Every journey<br>matters.</h1><p>Connect school transport teams, drivers and families in one organized place.</p><div class="auth-art-points"><span>Bus management</span><span>Driver profiles</span><span>Journey monitoring</span></div></div></section><section class="auth-card auth-card-modern"><span class="eyebrow">WELCOME BACK</span><h2>Sign in to your account</h2><p class="muted">Enter your details to continue to your transport workspace.</p>{% if error %}<div class="alert">{{error}}</div>{% endif %}<form method="POST"><label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required value="{{request.form.get('email','')}}"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required><button class="btn btn-full" type="submit">Sign in <span aria-hidden="true">→</span></button></form><p class="auth-switch">New to the system? <a href="{{url_for('signup')}}">Create an account</a></p><details class="demo-details"><summary>Demo accounts for project assessment</summary><p>Administrator: admin@school.com / admin123</p><p>Driver: driver@school.com / driver123</p><p>Parent: parent@school.com / parent123</p><small>For local demonstration only. Change these credentials before deployment.</small></details></section></div><p class="auth-foot">© 2026 School Bus Tracking System · Academic prototype</p></div>{% endblock %}

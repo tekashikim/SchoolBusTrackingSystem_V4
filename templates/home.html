@@ -1,0 +1,89 @@
+{% extends "base.html" %}{% block title %}School Bus Tracking System | Home{% endblock %}{% block content %}
+<div class="landing-page">
+    <header class="public-nav">
+        <a class="brand dark-brand" href="/">
+            <span class="brand-mark">SB</span>
+            <span>School Bus<small>Tracking System · Kenya</small></span>
+        </a>
+        <div>
+            <a class="nav-link" href="#features">Features</a>
+            <a class="nav-link" href="{{url_for('login')}}">Sign in</a>
+            <a class="btn btn-small" href="{{url_for('signup')}}">Create account</a>
+        </div>
+    </header>
+    <section class="hero hero-kenya">
+        <div class="hero-copy">
+            <span class="eyebrow">SCHOOL TRANSPORT MANAGEMENT · KENYA</span>
+            <h1>Every journey.
+                <br>
+                <span>Safely connected.</span>
+            </h1>
+            <p>One reliable workspace for school bus monitoring, driver identification and student transport records—built for Kenyan schools and families.</p>
+            <div class="hero-actions">
+                <a class="btn" href="{{url_for('login')}}">Access the system <span aria-hidden="true">→</span></a><a class="text-link" href="#features">Explore features</a>
+            </div>
+            <div class="trust-line">
+                <span class="trust-dot"></span> Clear transport records. Better communication. Safer journeys.
+            </div>
+            <div class="kenya-tags">
+                <span>KENYAN SCHOOLS</span>
+                <span>BUS MANAGEMENT</span>
+                <span>LIVE LOCATION</span>
+            </div>
+        </div>
+        <div class="hero-photo-card">
+            <img src="{{url_for('static',filename='images/kenyan-school-bus.png')}}" alt="School bus outside a school campus in a Kenyan highland landscape">
+            <div class="photo-overlay-label">
+                <span class="live-dot"></span>
+                <div>
+                    <strong>School transport, connected</strong>
+                    <small>Bus details · Routes · Driver profiles</small>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="features" class="features-section">
+        <div class="section-heading">
+            <span class="eyebrow">MADE FOR SCHOOL TRANSPORT</span>
+            <h2>Everything in one organized workspace</h2>
+            <p>Useful tools for school administrators, drivers and parents.</p>
+        </div>
+        <div class="feature-grid">
+            <article class="feature-card">
+                <span class="feature-number">01</span>
+                <h3>Bus management</h3>
+                <p>Maintain registration details, routes, assigned drivers and bus photos.</p>
+            </article>
+            <article class="feature-card">
+                <span class="feature-number">02</span>
+                <h3>Live location map</h3>
+                <p>View the recorded bus coordinates on an interactive map.</p>
+            </article>
+            <article class="feature-card">
+                <span class="feature-number">03</span>
+                <h3>Driver profiles</h3>
+                <p>Help parents and staff identify the assigned driver using approved profile photos.</p>
+            </article>
+            <article class="feature-card">
+                <span class="feature-number">04</span>
+                <h3>Student & attendance records</h3>
+                <p>Keep transport details, boarding and attendance records organized.</p>
+            </article>
+        </div>
+    </section>
+    <section class="closing-cta">
+        <div>
+            <span class="eyebrow">GET STARTED</span>
+            <h2>Welcome to your transport workspace.</h2>
+            <p>Sign in to your account or register a parent account to explore the system.</p>
+        </div>
+        <div class="cta-actions">
+            <a class="btn" href="{{url_for('login')}}">Sign in</a>
+            <a class="btn btn-outline" href="{{url_for('signup')}}">Create account</a>
+        </div>
+    </section>
+    <footer class="site-footer">
+        <span>© 2026 School Bus Tracking System</span>
+        <span>Academic project prototype · Kenya</span>
+    </footer>
+</div>{% endblock %}

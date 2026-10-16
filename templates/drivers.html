@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Driver Directory | School Bus Tracking System{% endblock %}
+{% block content %}
+<h1>Driver Directory</h1>
+<p class="muted">Check the assigned driver, bus, route, and current status. Photos are uploaded by the school administrator.</p>
+{% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}{% for category,message in messages %}<div class="notice {{ category }}">{{ message }}</div>{% endfor %}{% endif %}{% endwith %}
+{% if session.get('role') == 'Admin' %}
+<section class="panel panel-modern" style="margin: 1.25rem 0 1.5rem;"><h2>Add a new driver</h2><p class="muted">Create a separate driver login. After creating the account, you can upload their photo and assign them to a bus in Bus Management.</p><form method="POST" action="{{ url_for('add_driver') }}" class="formgrid"><div><label for="driver-fullname">Full name</label><input id="driver-fullname" name="fullname" autocomplete="name" placeholder="Driver's full name" required></div><div><label for="driver-email">Email address</label><input id="driver-email" name="email" type="email" autocomplete="email" placeholder="driver@school.com" required></div><div><label for="driver-password">Temporary password</label><input id="driver-password" name="password" type="password" minlength="8" autocomplete="new-password" required></div><div><label for="driver-confirm-password">Confirm password</label><input id="driver-confirm-password" name="confirm_password" type="password" minlength="8" autocomplete="new-password" required></div><button class="btn" type="submit">Create driver account</button></form></section>
+{% endif %}
+<div class="driver-grid">
+{% for d in drivers %}
+<article class="driver-card">
+{% if d.photo_filename %}<img class="driver-photo" src="{{ url_for('static', filename='uploads/' ~ d.photo_filename) }}" alt="Photo of {{ d.fullname }}">{% else %}<div class="driver-photo driver-placeholder" aria-label="No photo uploaded">{{ d.fullname[:1]|upper }}</div>{% endif %}
+<div class="driver-info"><h2>{{ d.fullname }}</h2><p><strong>Bus:</strong> {{ d.bus_number or 'Not assigned' }}</p><p><strong>Route:</strong> {{ d.route or 'Not assigned' }}</p><p><strong>Bus status:</strong> {{ d.bus_status or 'Not assigned' }}</p><p><strong>Account:</strong> <span class="status-tag {{ 'status-green' if d.account_status == 'Active' else 'status-red' }}">{{ d.account_status }}</span></p>
+{% if session.get('role') == 'Admin' %}<form method="POST" action="{{ url_for('update_driver_account_status', driver_id=d.id) }}" class="formgrid driver-status-form"><div><label for="driver-status-{{d.id}}">Driver account status</label><select id="driver-status-{{d.id}}" name="account_status"><option value="Active" {{ 'selected' if d.account_status == 'Active' else '' }}>Active</option><option value="Inactive" {{ 'selected' if d.account_status == 'Inactive' else '' }}>Inactive</option></select></div><button class="btn btn-small" type="submit">Save status</button></form>{% endif %}</div>
+</article>
+{% else %}<div class="panel">No driver accounts have been added yet.</div>{% endfor %}
+</div>
+{% endblock %}

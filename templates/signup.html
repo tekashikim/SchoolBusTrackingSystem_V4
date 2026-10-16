@@ -1,0 +1,51 @@
+{% extends "base.html" %}{% block title %}Create account | School Bus Tracking System{% endblock %}{% block content %}
+<div class="auth-page">
+    <a class="brand dark-brand auth-top-brand" href="/">
+        <span class="brand-mark">SB</span>
+        <span>School Bus<small>Tracking System · Kenya</small>
+        </span>
+    </a>
+    <div class="auth-layout auth-layout-register">
+        <section class="auth-art">
+            <div class="auth-art-shade"></div>
+            <div class="auth-art-copy">
+                <span class="eyebrow">WELCOME TO THE COMMUNITY</span>
+                <h1>Better journeys<br>start together.</h1>
+                <p>Create your account to access school transport information in one simple workspace.</p>
+                <div class="auth-art-points">
+                    <span>Connected families</span>
+                    <span>Organized records</span>
+                    <span>Trusted transport</span>
+                </div>
+            </div>
+        </section>
+        <section class="auth-card auth-card-modern">
+            <span class="eyebrow">ACCOUNT REGISTRATION</span>
+            <h2>Create your account</h2>
+            <p class="muted">Register using your name and email address.</p>{% if error %}
+            <div class="alert">{{error}}</div>{% endif %}
+            <form method="POST">
+                <label for="fullname">Full name</label>
+                <input id="fullname" name="fullname" autocomplete="name" placeholder="Enter your full name" required minlength="2" value="{{request.form.get('fullname','')}}">
+                <label for="email">Email address</label>
+                <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required value="{{request.form.get('email','')}}">
+                <label for="role">Register as</label>
+                <select id="role" name="role" required>
+                    <option value="Parent" {% if request.form.get('role','Parent') == 'Parent' %}selected{% endif %}>Parent</option>
+                    <option value="Driver" {% if request.form.get('role','Driver') == 'Driver' %}selected{% endif %}>Driver</option>
+                    <option value="Teacher" {% if request.form.get('role','Teacher') == 'Teacher' %}selected{% endif %}>Teacher</option>
+                </select>
+                <p class="field-help">Your account will open the workspace for your selected role.</p>
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required>
+                <label for="confirm_password">Confirm password</label>
+                <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" minlength="8" placeholder="Enter password again" required>
+                <button class="btn btn-full" type="submit">Create account <span aria-hidden="true">→</span></button>
+            </form>
+            <p class="auth-switch">Already registered? <a href="{{url_for('login')}}">Sign in</a></p>
+            <p class="fine-print">Choose Parent, Driver, or Teacher. Administrator access is created separately and cannot be selected during public registration.</p>
+        </section>
+    </div>
+    <p class="auth-foot">© 2026 School Bus Tracking System · Academic prototype</p>
+</div>
+{% endblock %}

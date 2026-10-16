@@ -1,0 +1,65 @@
+{% extends "base.html" %}{% block title %}Teacher Management | School Bus Tracking System{% endblock %}{% block content %}
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">ADMINISTRATION</span>
+        <h1>Teacher Management</h1>
+        <p>Create teacher accounts and manage their access.</p>
+    </div>
+</div>
+{% with messages = get_flashed_messages(with_categories=true) %}{% for category,message in messages %}
+<div class="notice {{category}}">{{message}}</div>{% endfor %}{% endwith %}
+<div class="panel panel-modern">
+    <h2>Add teacher</h2>
+    <form method="POST" action="{{url_for('add_teacher')}}" class="formgrid">
+        <div>
+            <label>Full name</label>
+            <input name="fullname" required minlength="2">
+        </div>
+        <div>
+            <label>Email</label>
+            <input name="email" type="email" required>
+        </div>
+        <div>
+            <label>Temporary password</label>
+            <input name="password" type="password" minlength="8" required>
+        </div>
+        <button class="btn">Create teacher account</button>
+    </form>
+</div>
+<div class="panel">
+    <h2>Teacher accounts</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Change access</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in teachers %}
+                <tr>
+                    <td>{{t.fullname}}</td>
+                    <td>{{t.email}}</td>
+                    <td><span class="status-tag {{'status-green' if t.account_status=='Active' else 'status-red'}}">{{t.account_status}}</span></td>
+                    <td>
+                        <form method="POST" action="{{url_for('update_teacher_status',teacher_id=t.id)}}" class="inline-form">
+                            <select name="account_status">
+                                <option value="Active" {{'selected' if t.account_status=='Active' else ''}}>Active</option>
+                                <option value="Inactive" {{'selected' if t.account_status=='Inactive' else ''}}>Inactive</option>
+                            </select>
+                            <button class="btn btn-small">Save</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4">No teachers have been added yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}{% block content %}
+<h1> Driver Workspace</h1>
+{% if bus %}
+<div class="panel">
+    <h2>{{bus.bus_number}}</h2>
+    <p>Route: 
+        <b>{{bus.route}}</b>
+    </p>
+    <p>Status: {{bus.status}}</p>
+    <p>Latitude: {{bus.latitude}} | Longitude: {{bus.longitude}}</p>
+    <button class="btn" onclick="gps()"> Use My Current Location</button><p id="msg"></p>
+    <form method="POST" action="/driver/status">
+        <select name="status">
+            <option>Available</option>
+            <option>On Route</option>
+            <option>Arrived at School</option>
+            <option>Completed</option>
+        </select>
+        <button class="btn">Update Status</button>
+    </form>
+</div>{% else %}<div class="error">No bus assigned to this driver. Ask the Admin to assign one.</div>{% endif %}
+<script>
+function gps(){let m=document.getElementById('msg');m.textContent='Getting GPS location...';
+if(!navigator.geolocation){m.textContent='GPS is not supported.';return}
+navigator.geolocation.getCurrentPosition(p=>{fetch('/driver/location',{method:'POST',headers:{'Content-Type':'application/json'},
+body:JSON.stringify({latitude:p.coords.latitude,longitude:p.coords.longitude})}).then(r=>r.json()).then(x=>{m.textContent=x.message;})},
+()=>m.textContent='Location permission denied or unavailable.',{enableHighAccuracy:true,timeout:10000})}
+</script>{% endblock %}

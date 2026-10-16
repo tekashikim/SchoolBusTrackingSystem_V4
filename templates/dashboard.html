@@ -1,0 +1,67 @@
+{% extends "base.html" %}{% block title %}Dashboard | School Bus Tracking System{% endblock %}{% block content %}
+<div class="dashboard-topline">
+    <div>
+        <span class="eyebrow">TRANSPORT OVERVIEW</span>
+        <h1>Good day, {{session.fullname.split(' ')[0]}}.</h1>
+        <p>Here is the current overview of your school transport workspace.</p>
+    </div>
+    <a class="btn" href="{{url_for('map_page')}}">Open live map 
+        <span aria-hidden="true">→</span>
+    </a>
+</div>
+<div class="dashboard-stats">
+    <article>
+        <span class="stat-icon stat-yellow">▰</span>
+        <small>Total buses</small>
+        <strong>{{stats[0]}}</strong>
+        <span class="stat-note">Registered in the system</span>
+    </article>
+    <article>
+        <span class="stat-icon stat-blue">⌖</span>
+        <small>Students</small>
+        <strong>{{stats[1]}}</strong>
+        <span class="stat-note">Transport records</span>
+    </article>
+    <article>
+        <span class="stat-icon stat-green">♙</span>
+        <small>Drivers</small>
+        <strong>{{stats[2]}}</strong>
+        <span class="stat-note">Driver accounts</span>
+    </article>
+    <article>
+        <span class="stat-icon stat-purple">↗</span>
+        <small>Buses on route</small>
+        <strong>{{stats[3]}}</strong>
+        <span class="stat-note">Current recorded status</span>
+    </article>
+</div>
+<div class="dashboard-grid">
+    <section class="dashboard-map-card">
+        <div class="section-card-head">
+            <div>
+                <span class="eyebrow">LIVE TRANSPORT</span>
+                <h2>Bus routes at a glance</h2>
+            </div>
+            <a href="{{url_for('map_page')}}">View map ↗</a>
+        </div>
+        <div class="dashboard-map">
+            <div class="map-road road-one">
+
+            </div>
+            <div class="map-road road-two"></div>
+            <div class="map-road road-three"></div>
+            <div class="map-road road-four"></div>
+            <span class="map-stop stop-one"></span>
+            <span class="map-stop stop-two"></span>
+            <span class="map-stop stop-three"></span>
+            <div class="map-bus bus-one">▰</div>
+            <div class="map-bus bus-two">▰</div>
+            <div class="map-map-label">
+                <span class="live-dot"></span> Route overview</div>
+            </div>
+            <div class="bus-mini-list">
+                {% for b in recent_buses %}
+                <div class="bus-mini-row">
+                    {% if b.photo_filename %}
+                    <img src="{{url_for('static',filename='uploads/' ~ b.photo_filename)}}" alt="{{b.bus_number}} bus">{% else %}<div class="bus-mini-placeholder">▰</div>{% endif %}<div class="bus-mini-info"><strong>{{b.bus_number}}</strong><small>{{b.route}} · {{b.driver or 'Driver not assigned'}}</small></div><span class="status-tag {{'status-green' if b.status=='On Route' else 'status-blue'}}">{{b.status}}</span></div>{% else %}<p class="empty-note">No buses have been registered yet.</p>{% endfor %}</div></section>
+<aside class="dashboard-side"><section class="dashboard-feature-bus"><div class="section-card-head"><div><span class="eyebrow">FEATURED BUS</span><h2>{{featured_bus.bus_number if featured_bus else 'Your fleet'}}</h2></div>{% if session.role=='Admin' %}<a href="{{url_for('buses')}}">Manage ↗</a>{% endif %}</div>{% if featured_bus and featured_bus.photo_filename %}<img class="featured-bus-photo" src="{{url_for('static',filename='uploads/' ~ featured_bus.photo_filename)}}" alt="Photo of bus {{featured_bus.bus_number}}">{% else %}<img class="featured-bus-photo" src="{{url_for('static',filename='images/kenyan-school-bus.png')}}" alt="School bus at a Kenyan school campus">{% endif %}<div class="featured-bus-details"><div><strong>{{featured_bus.bus_number if featured_bus else 'No bus yet'}}</strong><small>{{featured_bus.route if featured_bus else 'Add a bus to get started'}}</small></div>{% if featured_bus %}<span class="status-tag {{'status-green' if featured_bus.status=='On Route' else 'status-blue'}}">{{featured_bus.status}}</span>{% endif %}</div>{% if session.role=='Admin' %}<p class="image-admin-hint">Change this image in <a href="{{url_for('buses')}}">Bus Management</a>.</p>{% endif %}</section><section class="dashboard-shortcuts"><span class="eyebrow">QUICK ACCESS</span><h2>What would you like to do?</h2><a href="{{url_for('map_page')}}"><span>⌖</span><div><strong>View live tracking</strong><small>Open the bus location map</small></div><b>→</b></a>{% if session.role=='Admin' %}<a href="{{url_for('buses')}}"><span>▰</span><div><strong>Manage buses</strong><small>Add buses and update their photos</small></div><b>→</b></a>{% endif %}<a href="{{url_for('drivers_directory')}}"><span>♙</span><div><strong>Driver profiles</strong><small>See assigned drivers and photos</small></div><b>→</b></a></section></aside></div>{% endblock %}

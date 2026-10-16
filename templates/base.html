@@ -1,0 +1,78 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="School Bus Tracking System">
+    <title>{% block title %}School Bus Tracking System{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+    {% if session.get('user_id') and request.endpoint not in ['home', 'login', 'signup'] %}
+    <aside class="sidebar">
+        <a class="brand" href="{{ url_for('role_home') }}">
+            <span class="brand-mark">SB</span>
+            <span>School Transport
+                <small>Tracking System</small>
+            </span>
+        </a>
+
+        <div class="nav-label">WORKSPACE</div>
+
+        <a href="{{ url_for('role_home') }}">My workspace</a>
+        <a href="{{ url_for('profile') }}">My profile</a>
+
+        {% if session.get('role') in ['Admin', 'Parent', 'Teacher'] %}
+            <a href="{{ url_for('map_page') }}">Live bus map</a>
+            <a href="{{ url_for('drivers_directory') }}">Driver profiles</a>
+        {% endif %}
+
+        {% if session.get('role') == 'Admin' %}
+            <a href="{{ url_for('buses') }}">Bus management</a>
+            <a href="{{ url_for('students') }}">Students</a>
+            <a href="{{ url_for('attendance') }}">Attendance</a>
+            <a href="{{ url_for('reports') }}">Reports</a>
+            <a href="{{ url_for('teacher_management') }}">Teacher management</a>
+
+        {% elif session.get('role') == 'Driver' %}
+            <a href="{{ url_for('driver') }}">Driver workspace</a>
+            <a href="{{ url_for('attendance') }}">Attendance</a>
+
+        {% elif session.get('role') == 'Teacher' %}
+            <a href="{{ url_for('teacher_workspace') }}">Teacher workspace</a>
+            <a href="{{ url_for('students') }}">Student records</a>
+            <a href="{{ url_for('attendance') }}">Attendance</a>
+
+        {% elif session.get('role') == 'Parent' %}
+            <a href="{{ url_for('parent_workspace') }}">Parent workspace</a>
+            <a href="{{ url_for('students') }}">My student records</a>
+            <a href="{{ url_for('attendance') }}">Attendance history</a>
+            <a href="{{ url_for('parent_notifications') }}">Notifications</a>
+        {% endif %} 
+        
+        <a class="logout" href="{{ url_for('logout') }}">Sign out</a>
+
+        <div class="sidebar-bottom">
+            <span class="avatar">{{ session.get('fullname', 'U')[:1]|upper }}</span>
+            <span class="user-meta">
+                {{ session.get('fullname') }}
+                <small>{{ session.get('role') }}</small>
+            </span>
+        </div>
+    </aside>
+    {% endif %}
+
+    <main class="{% if session.get('user_id') and request.endpoint not in ['home', 'login', 'signup'] %}app-main{% elif request.endpoint in ['login', 'signup'] %}auth-page-main{% else %}public-main{% endif %}">
+        {% block content %}{% endblock %}
+
+        <footer class="site-footer">
+            School Bus Tracking System
+            <span>Academic project prototype</span>
+        </footer>
+    </main>
+
+</body>
+</html>

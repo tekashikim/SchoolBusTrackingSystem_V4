@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Attendance | School Bus Tracking System{% endblock %}
+{% block content %}
+<h1>Student Attendance</h1>
+{% with messages = get_flashed_messages(with_categories=true) %}{% for category,message in messages %}<div class="notice {{category}}">{{message}}</div>{% endfor %}{% endwith %}
+<div class="panel panel-modern">
+    <h2>Monthly attendance history</h2>
+    <form method="GET" action="{{url_for('attendance')}}" class="formgrid">
+        <div>
+            <label for="month">Choose month</label>
+            <input id="month" name="month" type="month" value="{{month}}">
+        </div>
+        <button class="btn">Filter records</button>
+        <a class="btn btn-secondary" href="{{url_for('attendance')}}">Clear</a>
+    </form>
+</div>
+{% if session.role in ['Admin','Driver','Teacher'] %}
+<div class="panel">
+    <h2>Record attendance</h2>
+    <p class="muted">Drivers should only use this form when the bus is safely stopped. A school attendant or teacher may record it instead.</p>
+    <form method="POST" action="{{url_for('add_attendance')}}" class="formgrid">
+        <div>
+            <label>Student</label>
+            <select name="student_id" required>
+                {% for s in students %}
+                <option value="{{s.id}}">{{s.admission_no}} — {{s.fullname}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>Bus</label>
+            <select name="bus_id" required>
+                {% for b in buses %}
+                <option value="{{b.id}}">{{b.bus_number}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>Status</label>
+            <select name="status">
+                <option>Boarded</option>
+                <option>Absent</option>
+                <option>Dropped off</option>
+            </select>
+        </div>
+        <button class="btn">Record attendance</button>
+    </form>
+</div>{% endif %}
+<div class="panel">
+    <h2>Attendance records</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Bus</th>
+                    <th>Status</th>
+                    <th>Date and time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td>{{r.fullname}}</td>
+                    <td>{{r.bus_number or '—'}}</td>
+                    <td>{{r.status}}</td>
+                    <td>{{r.recorded_at}}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4">No attendance records for this selection.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "base.html" %}{% block title %}Parent Workspace | School Bus Tracking System{% endblock %}{% block content %}
+<div class="dashboard-topline">
+    <div>
+        <span class="eyebrow">PARENT PORTAL</span>
+        <h1>Welcome, {{session.fullname.split(' ')[0]}}.</h1>
+        <p>View your linked children, school transport information and attendance history.</p>
+    </div>
+</div>
+<div class="stats-grid">
+    <article class="stat-card">
+        <span>Linked children</span>
+        <strong>{{children|length}}</strong>
+    </article>
+    <article class="stat-card">
+        <span>Unread notifications</span>
+        <strong>{{unread}}</strong>
+    </article>
+</div>
+<div class="panel panel-modern">
+    <div class="page-heading">
+        <div>
+            <h2>My children</h2>
+            <p class="muted">Only student records linked to your account appear here.</p>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Admission number</th>
+                    <th>Student</th>
+                    <th>Route</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for child in children %}
+                <tr>
+                    <td>{{child.admission_no}}</td>
+                    <td>{{child.fullname}}</td>
+                    <td>{{child.route}}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3">No children have been linked to your account yet. Contact the school administrator.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="panel">
+    <div class="page-heading">
+        <div>
+            <h2>Recent attendance</h2>
+            <p class="muted">Review the latest recorded transport attendance for your children.</p>
+        </div>
+        <a class="btn btn-secondary" href="{{url_for('attendance')}}">Full history</a>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Bus</th>
+                    <th>Status</th>
+                    <th>Recorded at</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in attendance_rows %}
+                <tr>
+                    <td>{{row.fullname}}</td>
+                    <td>{{row.bus_number or '—'}}</td>
+                    <td>{{row.status}}</td>
+                    <td>{{row.recorded_at}}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4">No attendance records yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="quick-links">
+    <a class="btn" href="{{url_for('parent_notifications')}}">View notifications{% if unread %} ({{unread}}){% endif %}</a>
+    <a class="btn btn-secondary" href="{{url_for('drivers_directory')}}">Driver profiles</a>
+    <a class="btn btn-secondary" href="{{url_for('map_page')}}">Live bus map</a>
+</div>
+{% endblock %}

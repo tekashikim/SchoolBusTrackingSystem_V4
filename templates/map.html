@@ -1,0 +1,331 @@
+
+{% extends "base.html" %}
+
+{% block head %}
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>Live School Bus Tracking</h1>
+    <p>View school bus locations, assigned drivers, routes, and statuses.</p>
+</div>
+
+<div
+    id="map"
+    style="height: 520px; width: 100%; border-radius: 13px;"
+></div>
+
+<div id="map-message" style="margin-top: 12px;">
+    Loading bus locations...
+</div>
+
+<style>
+    .bus-marker-offset-wrapper {
+        background: transparent;
+        border: none;
+    }
+
+    .bus-marker-offset-icon {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 25px;
+        height: 41px;
+        max-width: none;
+        transform-origin: 12px 41px;
+        pointer-events: auto;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const mapElement = document.getElementById('map');
+    const message = document.getElementById('map-message');
+
+    if (!mapElement || typeof L === 'undefined') {
+        console.error('Map element or Leaflet library is missing.');
+
+        if (message) {
+            message.textContent =
+                'The map could not initialize. Please refresh the page.';
+        }
+
+        return;
+    }
+
+    const map = L.map('map').setView([-1.286389, 36.817223], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Store marker objects by bus ID to prevent duplicate markers.
+    const markers = {};
+
+    // Screen-pixel offsets for buses sharing identical GPS coordinates.
+    // These offsets affect only the marker artwork, not GPS coordinates.
+    const pixelOffsets = [
+        [0, 0],
+        [35, 0],
+        [-35, 0],
+        [0, 35],
+        [0, -35]
+    ];
+
+    // Prevent overlapping API requests during slow refreshes.
+    let loading = false;
+
+    async function loadBuses() {
+        if (loading) {
+            return;
+        }
+
+        loading = true;
+
+        try {
+            const response = await fetch('/api/buses', {
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    'Server returned status ' + response.status
+                );
+            }
+
+            const buses = await response.json();
+
+            console.log('Buses received:', buses);
+
+            if (!Array.isArray(buses)) {
+                throw new Error(
+                    'The bus API did not return a list.'
+                );
+            }
+
+            if (buses.length === 0) {
+                // Remove old markers when the API returns no buses.
+                Object.values(markers).forEach(function (marker) {
+                    map.removeLayer(marker);
+                });
+
+                Object.keys(markers).forEach(function (id) {
+                    delete markers[id];
+                });
+
+                message.textContent =
+                    'No buses are available to display.';
+
+                return;
+            }
+
+            // Group buses by their original GPS coordinates.
+            const groups = {};
+
+            buses.forEach(function (bus) {
+                const lat = Number(bus.latitude);
+                const lng = Number(bus.longitude);
+
+                if (
+                    bus.id == null ||
+                    bus.latitude == null ||
+                    bus.longitude == null ||
+                    !Number.isFinite(lat) ||
+                    !Number.isFinite(lng) ||
+                    lat < -90 || lat > 90 ||
+                    lng < -180 || lng > 180
+                ) {
+                    console.warn(
+                        'Invalid bus ID or GPS coordinates:',
+                        bus.bus_number,
+                        bus.latitude,
+                        bus.longitude
+                    );
+
+                    return;
+                }
+
+                const key = lat + ',' + lng;
+
+                if (!groups[key]) {
+                    groups[key] = [];
+                }
+
+                groups[key].push(bus);
+            });
+
+            // Track which bus IDs are still returned by the API.
+            const activeBusIds = new Set();
+
+            // Process each valid bus.
+            buses.forEach(function (bus) {
+                const lat = Number(bus.latitude);
+                const lng = Number(bus.longitude);
+
+                if (
+                    bus.id == null ||
+                    bus.latitude == null ||
+                    bus.longitude == null ||
+                    !Number.isFinite(lat) ||
+                    !Number.isFinite(lng) ||
+                    lat < -90 || lat > 90 ||
+                    lng < -180 || lng > 180
+                ) {
+                    return;
+                }
+
+                const busId = String(bus.id);
+                activeBusIds.add(busId);
+
+                const key = lat + ',' + lng;
+                const group = groups[key];
+
+                // Find this bus's position in the overlapping group.
+                const groupIndex = group.findIndex(function (item) {
+                    return String(item.id) === busId;
+                });
+
+                // Preserve the actual GPS coordinates.
+                const position = [lat, lng];
+
+                // Offset only markers that share the same coordinates.
+                const offset = group.length > 1
+                    ? pixelOffsets[
+                        groupIndex % pixelOffsets.length
+                    ]
+                    : [0, 0];
+
+                const offsetX = offset[0];
+                const offsetY = offset[1];
+
+                const busIcon = L.divIcon({
+                    className: 'bus-marker-offset-wrapper',
+
+                    html: `
+                        <img
+                            class="bus-marker-offset-icon"
+                            src="https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png"
+                            alt="Bus marker"
+                            style="transform: translate(${offsetX}px, ${offsetY}px);"
+                        >
+                    `,
+
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34]
+                });
+
+                const popupContent = `
+                    <div style="min-width: 180px;">
+                        <strong>${escapeHTML(
+                            bus.bus_number || 'School Bus'
+                        )}</strong><br>
+
+                        Driver: ${escapeHTML(
+                            bus.driver || 'Not assigned'
+                        )}<br>
+
+                        Route: ${escapeHTML(
+                            bus.route || 'Not specified'
+                        )}<br>
+
+                        Status: ${escapeHTML(
+                            bus.status || 'Unknown'
+                        )}
+                    </div>
+                `;
+
+                if (markers[busId]) {
+                    // Update the existing marker without duplicating it.
+                    markers[busId]
+                        .setLatLng(position)
+                        .setIcon(busIcon)
+                        .setPopupContent(popupContent);
+                } else {
+                    // Create a new marker for this bus.
+                    markers[busId] = L.marker(position, {
+                        icon: busIcon
+                    })
+                        .addTo(map)
+                        .bindPopup(popupContent);
+                }
+            });
+
+            // Remove markers for buses no longer returned by the API.
+            Object.keys(markers).forEach(function (busId) {
+                if (!activeBusIds.has(busId)) {
+                    map.removeLayer(markers[busId]);
+                    delete markers[busId];
+                }
+            });
+
+            const visibleMarkers = Object.values(markers);
+
+            if (visibleMarkers.length > 0) {
+                const bounds = L.featureGroup(
+                    visibleMarkers
+                ).getBounds();
+
+                if (bounds.isValid()) {
+                    map.fitBounds(bounds, {
+                        padding: [40, 40],
+                        maxZoom: 15
+                    });
+                }
+
+                message.textContent =
+                    activeBusIds.size +
+                    ' bus record(s) loaded successfully.';
+            } else {
+                message.textContent =
+                    'Bus records were found, but none has valid GPS coordinates.';
+            }
+
+            // Recalculate the map layout after rendering.
+            map.invalidateSize();
+
+        } catch (error) {
+            console.error(
+                'Failed to load bus locations:',
+                error
+            );
+
+            message.textContent =
+                'Could not load bus locations. Check the server and browser console.';
+
+        } finally {
+            loading = false;
+        }
+    }
+
+    function escapeHTML(value) {
+        return String(value).replace(/[&<>"']/g, function (character) {
+            const entities = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            };
+
+            return entities[character];
+        });
+    }
+
+    // Load bus locations immediately.
+    loadBuses();
+
+    // Refresh bus information every five seconds.
+    setInterval(loadBuses, 5000);
+
+});
+</script>
+
+{% endblock %}

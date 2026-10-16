@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}Notice | School Bus Tracking System{% endblock %}
+{% block content %}
+<section class="panel error-page">
+    <span class="eyebrow">REQUEST NOTICE</span>
+    <h1>Unable to open this page</h1>
+    <p>{{message}}</p>
+    <a class="btn" href="{{url_for('dashboard') if session.get('user_id') else url_for('home')}}">Return to safety</a>
+</section>
+{% endblock %}
